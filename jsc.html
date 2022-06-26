@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <!doctype html>
+    <html lang="kr">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>모기지수 확인</title>
+    <style>
+        .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50vh;
+            padding-left: 20%;
+            padding-right: 20%;
+        }
+
+        .content {
+            font-family: system-ui, serif;
+            font-size: 4vw;
+            padding: 3vw;
+            border-radius:1vw;
+            background: #ff6e6c;
+            text-align: center
+        }
+        .buttcontent {
+            font-family: system-ui, serif;
+            font-size: 4vw;
+            padding: 1vw;
+            border-radius: 1vw;
+            background: #c7e6f5;
+            text-align: center
+           
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+    <script>
+        let date = new Date();
+        let yymmdd;
+        function yesterday() {//어제로 날짜 바꾸기
+            date.setDate(date.getDate() - 1);
+        }
+        function tomorrow() {//내일로 날짜바꾸기
+            date.setDate(date.getDate() + 1);
+        }
+
+        function getToday() {//yy-mm-dd형태로 오늘날짜 반환
+            var year = date.getFullYear();
+            var month = ("0" + (1 + date.getMonth())).slice(-2);
+            var day = ("0" + date.getDate()).slice(-2);
+            yymmdd = year + "-" + month + "-" + day;
+            return year + "-" + month + "-" + day;
+        }
+        function loadDoc() {
+            var xmlHttp = new XMLHttpRequest();			// XMLHttpRequest 객체를 생성함.
+            xmlHttp.onreadystatechange = function () {	// onreadystatechange 이벤트 핸들러를 작성함.
+                // 서버상에 문서가 존재하고 요청한 데이터의 처리가 완료되어 응답할 준비가 완료되었을 때
+                if (this.status == 200 && this.readyState == this.DONE) {
+                    processXMLObj(xmlHttp);
+                }
+            };
+            xmlHttp.open("GET", 'http://openapi.seoul.go.kr:8088/53496d4e4f626f6736334c72735a79/xml/MosquitoStatus/1/5/' + getToday(), true);//API 주소
+            xmlHttp.send();
+        }
+
+        function processXMLObj(xmlHttp) {
+            var xmlObj, nameList, result, idx;
+            xmlObj = xmlHttp.responseXML;	// 요청한 데이터를 XML DOM 객체로 반환함.
+            nameList = xmlObj.getElementsByTagName("MOSQUITO_VALUE_HOUSE");	// XML DOM 객체에서 id가 "MOSQUITO_VALUE_HOUSE"인 요소들을 선택함.
+            result = "";
+            for (idx = 0; idx < nameList.length; idx++) {
+                // id가 "MOSQUITO_VALUE_HOUSE"인 요소들의 텍스트 노드를 찾아 그 값을 반환함.
+                result += nameList[idx].childNodes[0].nodeValue + "<br>";
+            }
+            document.getElementById("mosq").innerHTML = result;
+            document.getElementById("Date").innerHTML = yymmdd;
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {//처음에 loadDoc()함수실행
+            loadDoc();
+        })
+    </script>
+</head>
+
+
+<body style="width: 100%; height: 100%;background: #fcfcfc">
+
+    <p style="font-size:2.5vw; text-align: center; font-weight:1000">
+        서울시오픈API로 모기지수를 실시간으로 보세요</p>
+    <p style="font-size:2vw; text-align: center; font-weight:bold">
+        모기지수 보는법<br>0~10 쾌적, 10~40 관심, 40~80 주의, 80~100 위험
+    </p>
+
+
+    <div class="container">
+
+        <div><!--왼쪽버튼 yersterday(),loadDoc()함수 실행-->
+            <button onclick="yesterday(),loadDoc()" class="buttcontent"style="border:none; font-weight:bold">
+                &nbsp;< &nbsp;
+            </button>
+        </div>
+
+        <div class="wrapper">
+
+            <div class="content">
+                <b id="Date"></b><br><!--Date로 yy/mm/dd형식 날짜출력-->
+                <b>모기지수는: </b><b id="mosq"></b><!--mosq로 Date에따른 모기지수 출력-->
+            </div>
+        </div>
+
+        <div><!--왼쪽버튼 tomorrow(),loadDoc()함수 실행-->
+            <button onclick="tomorrow(),loadDoc()"class="buttcontent"style="border:none; font-weight:bold">
+                &nbsp;> &nbsp;
+            </button>
+        </div>
+    </div>
+
+</body>
+
+</html>
