@@ -1,2 +1,2 @@
 # mosqitodie
-mosqito_website
+# https://kwonbowon.github.io/mosqitodie/
